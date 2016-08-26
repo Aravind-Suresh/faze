@@ -53,7 +53,7 @@ def face_pose(img, roi, pts):
     :param roi: ROI ( Dlib rectangle ) like: (x1, y1, x2, y2)
     :param array pts: Shape object with coordinates of landmarks [ Numpy array ]
 
-    :return tuple: (normal, yaw, pitch) of the given face in the ROI
+    :return tuple: (normal, yaw ( in radians ), pitch ( in radians )) of the given face in the ROI
     """
 
     # Computing required points
@@ -124,8 +124,8 @@ def frontal_transform(pts, normal, yaw, pitch):
 
     :param array pts: Shape object with coordinates of landmarks [ Numpy array ]
     :param array normal: Array of length=3, describing the facial normal
-    :param float yaw: Yaw angle of the face in the ROI
-    :param float pitch: Pitch angle of the face in the ROI
+    :param float yaw: Yaw angle of the face in the ROI ( in radians )
+    :param float pitch: Pitch angle of the face in the ROI ( in radians )
 
     :return array: Frontal transform of the facial keypoints
     """
