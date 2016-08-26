@@ -100,3 +100,69 @@ def face_pose(img, roi, pts):
 
     # print yaw, pitch
     return normal, yaw, pitch
+
+def frontal_transform(pts, normal, yaw, pitch):
+    def predict_z(pts, normal):
+        pts_new = []
+        for pt in pts:
+            z = pt[0]*normal[0] + pt[1]*normal[1]
+            z /= (-1)*(normal[2])
+            pts_new.append(np.array([pt[0], pt[1], z]))
+        return pts_new
+
+    def rotation_transform(pts, R):
+        ret = []
+        # print R
+        for pt in pts:
+            # print pt
+            ret.append(np.dot(R, pt))
+        return np.array(ret)
+
+    def get_rotation_matrix(axis, theta):
+        # axis: 0 for 'X', 1 for 'Y', 2 for 'Z'
+        C, S = np.cos(theta), np.sin(theta)
+        R = None
+        if axis == 0:
+            R = np.array([[1.0, 0, 0],
+                          [0, C, -S],
+                          [0, S, C]] )
+        elif axis == 1:
+            R = np.array([[C, 0, S],
+                          [0, 1.0, 0],
+                          [-S, 0, C]] )
+        else:
+            R = np.array([[C, -S, 0],
+                          [S, C, 0],
+                          [0, 0, 1.0]] )
+        return R
+
+    def compute_roll(pts):
+        # pts: Yaw, pitch corrected points
+        # p = pts[29] - pts[27]
+        p1 = pts[36] + pts[39]
+        p2 = pts[42] + pts[45]
+        p1 /= 2.0
+        p2 /= 2.0
+        p = p1 - p2
+        t = np.arctan2(p[0], p[1])
+        t = t+np.pi/2
+        # print np.degrees(t)
+        return t
+
+    pts_ = predict_z(pts, normal)
+    # print pts_
+
+    R_yaw = get_rotation_matrix(1, yaw)
+    R_pitch = get_rotation_matrix(0, pitch)
+
+    # print R_yaw
+    pts1 = rotation_transform(pts_, R_yaw)
+    pts2 = rotation_transform(pts1, R_pitch)
+
+    roll = compute_roll(pts2)
+    R_roll = get_rotation_matrix(2, roll)
+    pts3 = rotation_transform(pts2, R_roll)
+
+    # print pts3
+
+    return pts3
