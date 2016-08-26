@@ -21,23 +21,40 @@ detector = dlib.get_frontal_face_detector()
 predictor = None
 
 def faces(img):
-    # img: image
+    """
+    Function to return faces detected in the image
+
+    :param array img: Input image
+
+    :return array: Array of rectangles ( dlib )
+    """
     return detector(img, 1)
 
 def landmarks(img, roi, path):
-    # img: image
-    # roi: ROI of the face (x1, y1, x2, y2) [ Dlib rectangle ]
-    # path: /path/to/dlib/shape_predictor.dat
+    """
+    Function to return facial landmarks in the ROI provided
 
+    :param array img: Input image
+    :param roi: ROI ( Dlib rectangle ) like: (x1, y1, x2, y2)
+    :param str path: Path to the shape_predictor.dat file
+
+    :return: Shape object with coordinates of landmarks
+    """
     global predictor
     predictor = dlib.shape_predictor(path)
     shape = predictor(img, roi)
     return shape
 
 def face_pose(img, roi, pts):
-    # img: image
-    # roi: ROI of the face (x1, y1, x2, y2) [ Dlib rectangle ]
-    # pts: Dlib's 68 keypoints w.r.t original image coords ( Numpy array )
+    """
+    Function to compute face pose given an ROI
+
+    :param array img: Input image
+    :param roi: ROI ( Dlib rectangle ) like: (x1, y1, x2, y2)
+    :param array pts: Shape object with coordinates of landmarks [ Numpy array ]
+
+    :return tuple: (normal, yaw, pitch) of the given face in the ROI
+    """
 
     # Computing required points
     mid_eye = (pts[36] + pts[39] + pts[42] + pts[45])/4.0
@@ -102,6 +119,16 @@ def face_pose(img, roi, pts):
     return normal, yaw, pitch
 
 def frontal_transform(pts, normal, yaw, pitch):
+    """
+    Function to return the frontal transform of the keypoints ( uses roll angle )
+
+    :param array pts: Shape object with coordinates of landmarks [ Numpy array ]
+    :param array normal: Array of length=3, describing the facial normal
+    :param float yaw: Yaw angle of the face in the ROI
+    :param float pitch: Pitch angle of the face in the ROI
+
+    :return array: Frontal transform of the facial keypoints
+    """
     def predict_z(pts, normal):
         pts_new = []
         for pt in pts:

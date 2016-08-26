@@ -1,1 +1,8 @@
+*.egg-info
+__pycache__
+.idea/
 *.pyc
+dist/
+_build
+_static
+_templates
